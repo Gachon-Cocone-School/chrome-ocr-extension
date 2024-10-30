@@ -1,9 +1,7 @@
-/* popup.css */
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
-  width: 320px;
+  width: 400px; /* 팝업창 너비 확장 */
   padding: 0;
   margin: 0;
   display: flex;
@@ -27,6 +25,18 @@ body {
   margin-bottom: 16px;
 }
 
+textarea#url-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 13px; /* 텍스트 크기를 줄임 */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  height: 200px; /* URL 리스트 입력란 높이 확장 */
+  overflow-x: auto; /* 수평 스크롤바 추가 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+}
+
 .rounded-button {
   width: 100%;
   padding: 12px;
@@ -34,15 +44,10 @@ body {
   font-weight: 600;
   border: none;
   border-radius: 8px;
-  background-color: #007aff; /* 애플 스타일 파란색 */
+  background-color: #007aff;
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s ease-in-out;
-}
-
-.rounded-button:hover {
-  background-color: #005bb5; /* 호버 시 더 짙은 파란색 */
+  margin-top: 10px;
 }
 
 .result-container {

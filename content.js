@@ -114,6 +114,7 @@ function captureAndProcessScreen(callback) {
 chrome.runtime.onMessage.addListener((request) => {
   if (request.action === 'startProcessing') {
     (async function () {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await waitForImagesToLoad();
       clickExpandButtons();
       await waitForImagesToLoad();

@@ -18,13 +18,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.naver.com/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"]
     }
   ],
-  "host_permissions": [
-    "<all_urls>",
-    "*://*.googleapis.com/*",
-    "*://*.openai.com/*"
-  ]
+  "host_permissions": ["<all_urls>"]
 }
