@@ -50,7 +50,7 @@ function hideFloatingHeader() {
   }
 }
 
-async function scrollAndCapture() {
+async function scrollAndCapture(thumbnailUrl) {
   console.log('📜 스크롤 및 캡처 시작');
 
   // 스크롤을 시작하기 전에 화면을 맨 위로 이동
@@ -97,9 +97,12 @@ async function scrollAndCapture() {
     }
   }
 
-  chrome.runtime.sendMessage({ action: 'scrollComplete' }, (response) => {
-    console.log('📜 스크롤 완료:', response);
-  });
+  chrome.runtime.sendMessage(
+    { action: 'scrollComplete', thumbnail: thumbnailUrl },
+    (response) => {
+      console.log('📜 스크롤 완료:', response);
+    }
+  );
 }
 
 function captureAndProcessScreen(callback) {
@@ -111,6 +114,19 @@ function captureAndProcessScreen(callback) {
   });
 }
 
+function extractSpecificImageSource() {
+  // `alt`가 "추가이미지0"인 이미지를 바로 찾음
+  const img = document.querySelector('img[alt="대표이미지"]');
+
+  if (img && img.src) {
+    console.log(`🌐 발견된 이미지 URL: ${img.src}`);
+    return img.src;
+  } else {
+    console.log('⚠️ alt 속성이 "추가이미지0"인 이미지를 찾지 못했습니다.');
+    return '';
+  }
+}
+
 chrome.runtime.onMessage.addListener((request) => {
   if (request.action === 'startProcessing') {
     (async function () {
@@ -118,7 +134,7 @@ chrome.runtime.onMessage.addListener((request) => {
       await waitForImagesToLoad();
       clickExpandButtons();
       await waitForImagesToLoad();
-      await scrollAndCapture();
+      await scrollAndCapture(extractSpecificImageSource());
     })();
   }
 });

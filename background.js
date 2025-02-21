@@ -101,7 +101,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         // workflow 가 등록되었다면 전달
         if (CONFIG.WORKFLOW_URL.trim()) {
-          sendOCRResultToWorkflow(fileName, infoByTab[tabId].texts);
+          sendOCRResultToWorkflow(
+            fileName,
+            infoByTab[tabId].texts,
+            sender.tab.url,
+            request.thumbnail
+          );
           console.log(message);
         }
 
@@ -135,7 +140,7 @@ function generateFileName(url) {
   return paths.join('_');
 }
 
-async function sendOCRResultToWorkflow(fileName, ocrText) {
+async function sendOCRResultToWorkflow(fileName, ocrText, url, thumbnail) {
   const now = new Date();
   const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
     2,
@@ -150,6 +155,8 @@ async function sendOCRResultToWorkflow(fileName, ocrText) {
     date: localDate, // 로컬 타임으로 변환한 날짜와 시간
     product_id: fileName, // 파일명을 product_id로 보냄
     text: ocrText, // OCR 결과를 ocr_text로 보냄
+    url: url,
+    thumbnail: thumbnail,
   };
 
   try {
