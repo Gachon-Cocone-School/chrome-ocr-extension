@@ -88,7 +88,8 @@ async function scrollAndCapture(thumbnailUrl) {
     // 100ms 대기
 
     await waitForImagesToLoad();
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    clickExpandButtons();
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     let newTotalHeight = document.body.scrollHeight;
     if (newTotalHeight > totalHeight) {
