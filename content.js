@@ -89,7 +89,7 @@ async function scrollAndCapture(thumbnailUrl) {
 
     await waitForImagesToLoad();
     clickExpandButtons();
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     let newTotalHeight = document.body.scrollHeight;
     if (newTotalHeight > totalHeight) {
@@ -128,7 +128,7 @@ function extractSpecificImageSource() {
   }
 }
 
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'startProcessing') {
     (async function () {
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -137,5 +137,7 @@ chrome.runtime.onMessage.addListener((request) => {
       await waitForImagesToLoad();
       await scrollAndCapture(extractSpecificImageSource());
     })();
+  } else if (request.action === 'getHtml') {
+    sendResponse(document.documentElement.outerHTML);
   }
 });

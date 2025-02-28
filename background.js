@@ -90,36 +90,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     });
     return true;
-  } else if (request.action === 'scrollComplete') {
+  }  else if (request.action === 'scrollComplete') {
     const tabId = sender.tab.id;
     (async () => {
       // 남은 배치 처리
-      await processImageBatch(tabId).then(() => {
-        const fileName = generateFileName(sender.tab.url); // 파일명 생성
-        const message = `OCR text saved to ${fileName}`;
-        console.log('OCR text: ', infoByTab[tabId].texts);
+      await processImageBatch(tabId); // await 추가
+      const fileName = generateFileName(sender.tab.url); // 파일명 생성
+      const message = `OCR text saved to ${fileName}`;
+      console.log('OCR text: ', infoByTab[tabId].texts);
 
-        // workflow 가 등록되었다면 전달
-        if (CONFIG.WORKFLOW_URL.trim()) {
-          sendOCRResultToWorkflow(
-            fileName,
-            infoByTab[tabId].texts,
-            sender.tab.url,
-            request.thumbnail
-          );
-          console.log(message);
-        }
+      // workflow 가 등록되었다면 전달
+      if (CONFIG.WORKFLOW_URL.trim()) {
+        chrome.tabs.sendMessage(
+          tabId,
+          { action: 'getHtml' },
+          (html) => {
+            sendOCRResultToWorkflow(
+              fileName,
+              infoByTab[tabId].texts,  // 여기서 infoByTab[tabId].texts 사용
+              sender.tab.url,
+              request.thumbnail,
+              html // HTML 코드 추가
+            );
+            console.log(message);
+             infoByTab[tabId].texts = ''; // 여기서 초기화
+          }
+        );
+      } else { //CONFIG.WORKFLOW_URL.trim()이 없을 때, infoByTab 초기화.
+          infoByTab[tabId].texts = ''; // 여기서 초기화
+      }
 
-        infoByTab[tabId].texts = ''; // 누적 텍스트 초기화
+      // 팝업화면에 전달
+      if (popupPort) {
+        popupPort.postMessage({ action: 'displayResult', message });
+      }
 
-        // 팝업화면에 전달
-        if (popupPort) {
-          popupPort.postMessage({ action: 'displayResult', message });
-        }
-
-        // content.js 에 전달
-        sendResponse({ message }); // OCR 결과를 응답으로 반환
-      });
+      // content.js 에 전달
+      sendResponse({ message }); // OCR 결과를 응답으로 반환
     })();
     return true;
   } else if (request.action === 'progressUpdate') {
@@ -140,7 +147,7 @@ function generateFileName(url) {
   return paths.join('_');
 }
 
-async function sendOCRResultToWorkflow(fileName, ocrText, url, thumbnail) {
+async function sendOCRResultToWorkflow(fileName, ocrText, url, thumbnail, html) {
   const now = new Date();
   const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
     2,
@@ -151,13 +158,18 @@ async function sendOCRResultToWorkflow(fileName, ocrText, url, thumbnail) {
     now.getSeconds()
   ).padStart(2, '0')}`;
 
+  const encodedHtml = btoa(unescape(encodeURIComponent(html)));
+
   const requestBody = {
     date: localDate, // 로컬 타임으로 변환한 날짜와 시간
     product_id: fileName, // 파일명을 product_id로 보냄
     text: ocrText, // OCR 결과를 ocr_text로 보냄
     url: url,
     thumbnail: thumbnail,
+    html: encodedHtml,
   };
+
+  console.log(requestBody)
 
   try {
     const response = await fetch(CONFIG.WORKFLOW_URL, {
