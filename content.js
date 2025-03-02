@@ -89,7 +89,7 @@ async function scrollAndCapture(thumbnailUrl) {
 
     await waitForImagesToLoad();
     clickExpandButtons();
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     let newTotalHeight = document.body.scrollHeight;
     if (newTotalHeight > totalHeight) {

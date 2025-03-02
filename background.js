@@ -143,8 +143,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 function generateFileName(url) {
-  const paths = new URL(url).pathname.split('/').slice(-3);
-  return paths.join('_');
+  const parts = new URL(url).pathname.split('/').filter(Boolean);
+  const essential = parts.slice(0, 3);
+  return essential.join('_');
+}
+
+function extractCoreProductURL(url) {
+  const u = new URL(url);
+  // pathname에서 빈 문자열 제거 후 앞 3개 세그먼트 추출
+  const parts = u.pathname.split('/').filter(Boolean);
+  const corePath = parts.slice(0, 3).join('/');
+  return `${u.protocol}//${u.host}/${corePath}`;
 }
 
 async function sendOCRResultToWorkflow(fileName, ocrText, url, thumbnail, html) {
